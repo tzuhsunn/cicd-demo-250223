@@ -51,6 +51,6 @@ deploy dev:
     - kustomize edit set image $registry/$app_name/$app_name:$app_version
     - cat kustomization.yml
     - git commit -am '[skip ci] DEV image update'
-    - git push origin master
+    - git push origin main
   needs:
     - docker push

@@ -6,6 +6,7 @@ workflow:
         registry_name: $ci_registry_name
         registry_passwd: $ci_registry_passwd
 
+image: docker:20.10.16
 variables:
   app_name: $CI_PROJECT_NAME
   app_version: $CI_COMMIT_SHORT_SHA
@@ -38,17 +39,8 @@ docker push:
 
 deploy dev:
   stage: deploy
-  before_script:
-    - git remote set-url origin http://${CI_USERNAME}:${CI_PASSWORD}@10.128.0.40/demo/demo.git
-    - git config --global user.name "Administrator"
-    - git config --global user.email "admin@example.com"
+  image: bitnami/kubectl:latest
   script:
-    - git checkout -B main
-    - cd base
-    - kustomize edit set image $registry/$app_name/$app_name:$app_version
-    - cat kustomization.yaml
-    - git commit -am '[skip ci] DEV image update'
-    - git push origin main
+    - kubectl set image deployment/$app_name nginx=$registry/$app_name/$app_name:$app_version -n $namespace
   needs:
     - docker push
-

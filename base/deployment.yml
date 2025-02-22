@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
         - name: demo-nginx
-          image: 
+          image: 34.30.23.120:30080/demo/demo@sha256:69da249391b030c2f664657f117807db1ce3ec74daf1cac835351d0f8bba3a83
           imagePullPolicy: Always
           ports:
             - containerPort: 80

@@ -6,3 +6,5 @@ kind: Kustomization
 images:
 - name: 10.128.0.37:30080/demo/demo
   newTag: 3a2459dd
+- name: 34.30.23.120:30080/demo/demo
+  newTag: 93a8c193

@@ -1,0 +1,55 @@
+workflow:
+  rules:
+    - if: $CI_COMMIT_BRANCH == 'main'
+      variables:
+        registry: $ci_registry
+        registry_name: $ci_registry_name
+        registry_passwd: $ci_registry_passwd
+
+variables:
+  app_name: $CI_PROJECT_NAME
+  app_version: $CI_COMMIT_SHORT_SHA
+  namespace: $CI_PROJECT_NAMESPACE
+  GIT_CLONE_PATH: '$CI_BUILDS_DIR/$CI_JOB_ID/$CI_PROJECT_NAME'
+
+stages:
+  - build
+  - deploy
+
+docker build:
+  stage: build
+  script:
+    - docker build -t $app_name:$app_version .
+
+docker tag:
+  stage: build
+  script:
+    - docker tag $app_name:$app_version $registry/$app_name/$app_name:$app_version
+  needs:
+    - docker build
+
+docker push:
+  stage: build
+  script:
+    - docker login -u $ci_registry_name -p $ci_registry_passwd $ci_registry
+    - docker push $registry/$app_name/$app_name:$app_version
+    - docker logout
+  needs:
+    - docker tag
+
+deploy dev:
+  stage: deploy
+  before_script:
+    - git remote set-url origin http://${CI_USERNAME}:${CI_PASSWORD}@10.128.0.40/demo/demo.git
+    - git config --global user.name "Administrator"
+    - git config --global user.email "admin@example.com"
+  script:
+    - git checkout -B main
+    - cd base
+    - kustomize edit set image $registry/$app_name/$app_name:$app_version
+    - cat kustomization.yaml
+    - git commit -am '[skip ci] DEV image update'
+    - git push origin main
+  needs:
+    - docker push
+

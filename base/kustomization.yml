@@ -3,3 +3,6 @@ resources:
 - service.yml
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
+images:
+- name: 10.128.0.37:30080/demo/demo
+  newTag: e83a649f

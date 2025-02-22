@@ -25,6 +25,7 @@ docker tag:
   stage: build
   script:
     - docker tag $app_name:$app_version $registry/$app_name/$app_name:$app_version
+    - docker images
   needs:
     - docker build
 

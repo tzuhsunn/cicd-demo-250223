@@ -11,6 +11,7 @@ variables:
   app_name: $CI_PROJECT_NAME
   app_version: $CI_COMMIT_SHORT_SHA
   namespace: $CI_PROJECT_NAMESPACE
+  DEPLOYMENT_FILE: "base/deployment.yml" 
 
 stages:
   - build
@@ -40,8 +41,16 @@ docker push:
 
 deploy dev:
   stage: deploy
-  image: bitnami/kubectl:latest
+  before_script:
+    - git remote set-url origin http://${CI_USERNAME}:${CI_PASSWORD}@34.123.16.39/demo/demo.git
+    - git config --global user.name "Administrator"
+    - git config --global user.email "admin@example.com"
   script:
-    - kubectl set image deployment/$app_name nginx=$registry/$app_name/$app_name:$app_version -n $namespace
+    - git checkout -B main
+    - cd base
+    - kustomize edit set image $registry/$app_name/$app_name:$app_version
+    - cat kustomization.yml
+    - git commit -am '[skip ci] DEV image update'
+    - git push origin master
   needs:
     - docker push
